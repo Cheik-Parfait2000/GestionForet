@@ -1,0 +1,84 @@
+// Variable de style lorsu'on survole une couche polygone
+var highlightStyle = {
+  fillColor: 'blue',
+  fillOpacity: 0.5,
+  color: 'blue',
+};
+
+// Couche sélectionnée sur la carte
+var selectedFeature = null;
+var coordonnees_clic = null;
+
+// ---------------- Chargement des détails d'incendies --------------
+function getAllData() {
+    var url_objet = 'http://127.0.0.1:8000/gestionArbres/getData/';
+
+    $.ajax(
+        {
+            url: url_objet,
+            type: 'GET',
+            success: function(data) {
+                // Mettre à jour la variable arbres
+                // arbres = JSON.parse(data);
+                arbresLayer = L.geoJSON(JSON.parse(data), {
+                onEachFeature: function(feature, layer) {
+                    layer.bindTooltip("Arbre : " + feature.properties.espece);
+                    }
+                }).addTo(map);
+            }
+        });
+};
+
+
+// Fonction qui initialise la carte
+function initialiserCarte (){
+
+    // Tuilage de couches raster
+    osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    esriIMG = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+
+    // On crée la carte : et par défaut, on ajoute les couches osm et cities
+    map = L.map('map', {
+        layers: [osm]
+    });
+    map.setView([35.24, -5.47], 9);
+    //map.zoomControl.setPosition('topright');
+
+    // Récupérer les données du serveur : mettre à jour la variable arbres avec les données geojson des arbres
+    getAllData()
+
+    // Récupération des données des arbres et affichage
+    // arbresLayer = L.geoJSON(arbres, {
+    //   onEachFeature: function(feature, layer){
+    //         // layer.bindPopup("Secteur forestier : " + feature.id);
+    //         // layer.on('mouseover', modifierStylePolygon);
+    //         // layer.on('mouseout', retablirStylePolygon);
+    //         layer.bindTooltip("Arbre : " + feature.properties.espece);
+    //         // layer.on('click', handleArbreClick);
+    //     }
+    // }).addTo(map);
+
+
+    // ------------- Groupage --------
+    // Un dictionnaire des fonds de cartes
+    var fondsCarto = {'Open Street Map': osm, 'Imagery Satellitaire': esriIMG};
+    // Un dictionnaire des couches qui seront disposées au dessus du fond de carte
+    var overlayLayers = {
+        "Arbres": arbresLayer,
+        };
+
+    // Création du controleur : Affiche un widget contenant les fondsCarto et overlayLayers
+    var layerControl = L.control.layers(fondsCarto, overlayLayers, {
+        collapsed: false
+     }).addTo(map);
+
+     };
+
+
+document.addEventListener('DOMContentLoaded', initialiserCarte);

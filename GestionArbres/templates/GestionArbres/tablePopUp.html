@@ -1,0 +1,12 @@
+
+<div class="details-arbres">
+    <p><strong>Code :</strong> {{ arbre.id_arbre }}</p>
+    <p><strong>Espèce :</strong> {{ arbre.espece }}</p>
+    <p><strong>Hauteur :</strong> {{ arbre.hauteur }}</p>
+    <p><strong>Circonférence :</strong> {{ arbre.circonferance }}</p>
+    <p><strong>Age :</strong> {{ arbre.age }}</p>
+    {% for pt in arbre.geometrie_arbre %}
+        <p><strong>Latitude :</strong> {{ pt.y | floatformat:4 }}</p>
+        <p><strong>Longitude :</strong> {{ pt.x | floatformat:4 }}</p>
+    {% endfor %}
+</div>
